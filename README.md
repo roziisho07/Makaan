@@ -1,36 +1,57 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Makaan
 
-## Getting Started
+Modern real-estate web app built with Next.js App Router, with an AI-ready data model and personalization features.
 
-First, run the development server:
+## Local development
+
+1. Install dependencies:
+
+```bash
+npm install
+```
+
+2. Copy environment file and update your database URL:
+
+```bash
+cp .env.example .env
+```
+
+3. Start your PostgreSQL database, then initialize Prisma:
+
+```bash
+npm run db:generate
+npm run db:push
+npm run db:seed
+```
+
+4. Run the app:
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open http://localhost:3000.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Database commands
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+- `npm run db:generate`: Generate Prisma client.
+- `npm run db:migrate`: Create and apply a migration in development.
+- `npm run db:push`: Push schema changes without creating migration files.
+- `npm run db:seed`: Seed sample listings.
+- `npm run db:studio`: Open Prisma Studio.
 
-## Learn More
+## API endpoints
 
-To learn more about Next.js, take a look at the following resources:
+- `GET /api/listings`: List/search listings.
+- `GET /api/listings?listingType=sale&status=available&limit=12`: Filter listings.
+- `GET /api/listings/[slug]`: Fetch one listing by slug.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## AI-ready schema notes
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+The `Listing` model includes fields for AI features:
 
-## Deploy on Vercel
+- `aiSummary`: generated natural-language summary.
+- `embeddingModel`: model metadata for vectors.
+- `embeddingVector`: JSON placeholder for embeddings until pgvector is added.
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Additional models (`SearchEvent`, `SavedListing`, `Inquiry`) capture behavior and intent signals for future AI ranking and assistant workflows.

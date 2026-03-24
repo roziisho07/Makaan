@@ -1,0 +1,121 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum ListingType {
+  sale
+  rent
+}
+
+enum ListingStatus {
+  available
+  pending
+  sold
+}
+
+enum InquiryStatus {
+  new
+  contacted
+  closed
+}
+
+enum UserRole {
+  user
+  admin
+}
+
+model Listing {
+  id               String        @id
+  slug             String        @unique
+  title            String
+  price            Int
+  address          String
+  beds             Int
+  baths            Float
+  sqft             Int
+  imageUrls        String[]
+  description      String?
+  neighborhood     String?
+  highlights       String[]
+  amenities        String[]
+  isFeatured       Boolean       @default(false)
+  isNew            Boolean       @default(false)
+  rating           Float?
+  listingType      ListingType
+  status           ListingStatus @default(available)
+  userId           String?
+  user             AppUser?      @relation(fields: [userId], references: [id], onDelete: SetNull)
+  aiSummary        String?
+  embeddingModel   String?
+  embeddingVector  Json?
+  savedBy          SavedListing[]
+  inquiries        Inquiry[]
+  searchClicks     SearchEvent[] @relation("SearchClickListing")
+  createdAt        DateTime      @default(now())
+  updatedAt        DateTime      @updatedAt
+
+  @@index([userId])
+}
+
+model AppUser {
+  id           String         @id @default(cuid())
+  clerkId      String?        @unique
+  email        String         @unique
+  name         String?
+  passwordHash String?
+  role         UserRole       @default(user)
+  listings     Listing[]
+  savedListings SavedListing[]
+  inquiries    Inquiry[]
+  searchEvents SearchEvent[]
+  createdAt    DateTime       @default(now())
+  updatedAt    DateTime       @updatedAt
+}
+
+model SavedListing {
+  id         String   @id @default(cuid())
+  userId     String
+  listingId  String
+  user       AppUser  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  listing    Listing  @relation(fields: [listingId], references: [id], onDelete: Cascade)
+  createdAt  DateTime @default(now())
+
+  @@unique([userId, listingId])
+  @@index([listingId])
+}
+
+model Inquiry {
+  id            String       @id @default(cuid())
+  userId         String?
+  listingId      String
+  message        String
+  phone          String?
+  status         InquiryStatus @default(new)
+  user           AppUser?     @relation(fields: [userId], references: [id], onDelete: SetNull)
+  listing        Listing      @relation(fields: [listingId], references: [id], onDelete: Cascade)
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+
+  @@index([listingId])
+  @@index([userId])
+}
+
+model SearchEvent {
+  id               String    @id @default(cuid())
+  userId            String?
+  query             String
+  filters           Json?
+  topResultIds      String[]
+  clickedListingId  String?
+  user              AppUser? @relation(fields: [userId], references: [id], onDelete: SetNull)
+  clickedListing    Listing? @relation("SearchClickListing", fields: [clickedListingId], references: [id], onDelete: SetNull)
+  createdAt         DateTime @default(now())
+
+  @@index([userId])
+  @@index([clickedListingId])
+}

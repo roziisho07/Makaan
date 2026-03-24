@@ -1,0 +1,140 @@
+import type { Listing } from "../types/listing";
+
+export const sampleListings: Listing[] = [
+  {
+    id: "1",
+    slug: "modern-family-home-springfield",
+    title: "Modern Family Home",
+    price: 450000,
+    address: "123 Main St, Springfield, IL 62701",
+    beds: 4,
+    baths: 3,
+    sqft: 2500,
+    imageUrls: ["/heroimage.jpg"],
+    description:
+      "Bright open-concept home with oversized kitchen island, flexible office nook, and a backyard designed for weekend gatherings.",
+    neighborhood: "Riverside District",
+    highlights: [
+      "Renovated kitchen",
+      "Large backyard deck",
+      "Dedicated office",
+    ],
+    amenities: ["Garage", "Smart thermostat", "Laundry room"],
+    rating: 4.5,
+    listingType: "sale",
+    status: "available",
+    isFeatured: true,
+  },
+  {
+    id: "2",
+    slug: "luxury-downtown-apartment-park-ave",
+    title: "Luxury Downtown Apartment",
+    price: 3200,
+    address: "456 Park Ave, New York, NY 10022",
+    beds: 2,
+    baths: 2,
+    sqft: 1200,
+    imageUrls: ["/heroimage.jpg"],
+    description:
+      "High-floor apartment with skyline views, modern finishes, and direct access to premium dining, transit, and nightlife.",
+    neighborhood: "Midtown East",
+    highlights: ["City skyline views", "24/7 concierge", "Walk-to-transit"],
+    amenities: ["Gym", "Doorman", "Rooftop lounge"],
+    rating: 4.8,
+    listingType: "rent",
+    status: "available",
+    isNew: true,
+  },
+  {
+    id: "3",
+    slug: "suburban-ranch-with-pool-austin",
+    title: "Suburban Ranch with Pool",
+    price: 675000,
+    address: "789 Oak Lane, Austin, TX 78701",
+    beds: 5,
+    baths: 4,
+    sqft: 3200,
+    imageUrls: ["/heroimage.jpg"],
+    description:
+      "Spacious single-level ranch with a private pool, expanded living wing, and polished interiors built for family comfort.",
+    neighborhood: "Oak Hills",
+    highlights: ["Private pool", "Guest suite", "Remodeled bathrooms"],
+    amenities: ["EV charger", "Outdoor kitchen", "Solar panels"],
+    rating: 4.9,
+    listingType: "sale",
+    status: "available",
+    isFeatured: true,
+  },
+  {
+    id: "4",
+    slug: "beachfront-condo-miami",
+    title: "Beachfront Condo",
+    price: 2800,
+    address: "101 Beach Blvd, Miami, FL 33139",
+    beds: 3,
+    baths: 2,
+    sqft: 1500,
+    imageUrls: ["/heroimage.jpg"],
+    description:
+      "Sunny ocean-facing condo featuring full-width balcony views and a breezy interior layout steps from the shoreline.",
+    neighborhood: "South Beach",
+    highlights: ["Beach access", "Corner balcony", "Resort-style lobby"],
+    amenities: ["Pool", "Fitness center", "Secure parking"],
+    rating: 4.7,
+    listingType: "rent",
+    status: "available",
+  },
+  {
+    id: "5",
+    slug: "historic-brownstone-boston",
+    title: "Historic Brownstone",
+    price: 895000,
+    address: "202 Beacon St, Boston, MA 02116",
+    beds: 4,
+    baths: 3.5,
+    sqft: 2800,
+    imageUrls: ["/heroimage.jpg"],
+    description:
+      "Character-filled brownstone with restored details, modern utility upgrades, and generous entertaining spaces.",
+    neighborhood: "Back Bay",
+    highlights: [
+      "Original stone facade",
+      "Updated utilities",
+      "Fireplace lounge",
+    ],
+    amenities: ["Private patio", "Wine storage", "Walk-up attic"],
+    rating: 4.6,
+    listingType: "sale",
+    status: "pending",
+  },
+  {
+    id: "6",
+    slug: "modern-studio-arts-district-los-angeles",
+    title: "Modern Studio in Arts District",
+    price: 1800,
+    address: "303 Gallery Row, Los Angeles, CA 90012",
+    beds: 1,
+    baths: 1,
+    sqft: 650,
+    imageUrls: ["/heroimage.jpg"],
+    description:
+      "Efficient studio with loft-style finishes, floor-to-ceiling windows, and quick access to galleries and cafes.",
+    neighborhood: "Arts District",
+    highlights: ["Loft style", "Natural light", "Creative district location"],
+    amenities: ["In-unit washer", "Bike storage", "Pet friendly"],
+    rating: 4.4,
+    listingType: "rent",
+    status: "available",
+    isNew: true,
+  },
+];
+
+export function getListingPath(listing: Listing): string {
+  return `/listings/${listing.slug}`;
+}
+
+export function getListingBySlugOrId(slugOrId: string): Listing | undefined {
+  return sampleListings.find(
+    (listing) => listing.slug === slugOrId || listing.id === slugOrId,
+  );
+}
