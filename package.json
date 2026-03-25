@@ -5,20 +5,24 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build",
+    "build:production": "prisma generate && prisma migrate deploy && next build",
     "start": "next start",
     "lint": "eslint",
     "db:generate": "prisma generate",
     "db:migrate": "prisma migrate dev",
+    "db:migrate:deploy": "prisma migrate deploy",
     "db:push": "prisma db push",
     "db:seed": "prisma db seed",
     "db:studio": "prisma studio"
   },
+  "postinstall": "prisma generate",
   "prisma": {
     "seed": "tsx prisma/seed.ts"
   },
   "dependencies": {
     "@clerk/nextjs": "^7.0.6",
     "@prisma/client": "^6.17.1",
+    "@supabase/supabase-js": "^2.100.0",
     "bcryptjs": "^3.0.3",
     "lucide-react": "^0.577.0",
     "nanoid": "^5.1.7",

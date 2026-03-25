@@ -1,8 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
-import { writeFile, mkdir } from "fs/promises";
 import { randomUUID } from "crypto";
-import { join } from "path";
 import { auth } from "@clerk/nextjs/server";
+import {
+  getSupabaseStorageAdminClient,
+  getSupabaseStorageBucket,
+} from "../../lib/supabaseStorage";
 
 export async function POST(request: NextRequest) {
   try {
@@ -37,22 +39,38 @@ export async function POST(request: NextRequest) {
     const bytes = await file.arrayBuffer();
     const buffer = Buffer.from(bytes);
 
-    // Create unique filename
-    const ext = file.name.split(".").pop()?.toLowerCase() || "jpg";
+    const ext =
+      file.name
+        .split(".")
+        .pop()
+        ?.replace(/[^a-z0-9]/gi, "")
+        ?.toLowerCase() || "jpg";
     const filename = `${randomUUID()}.${ext}`;
-    const uploadDir = join(process.cwd(), "public", "uploads", "listings");
+    const objectPath = `listings/${userId}/${filename}`;
+    const supabase = getSupabaseStorageAdminClient();
+    const bucket = getSupabaseStorageBucket();
 
-    // Ensure directory exists
-    await mkdir(uploadDir, { recursive: true });
+    const { error: uploadError } = await supabase.storage
+      .from(bucket)
+      .upload(objectPath, buffer, {
+        cacheControl: "3600",
+        contentType: file.type,
+        upsert: false,
+      });
 
-    // Save file
-    const filepath = join(uploadDir, filename);
-    await writeFile(filepath, buffer);
+    if (uploadError) {
+      throw new Error(uploadError.message);
+    }
 
-    // Return accessible URL
-    const imageUrl = `/uploads/listings/${filename}`;
+    const {
+      data: { publicUrl },
+    } = supabase.storage.from(bucket).getPublicUrl(objectPath);
 
-    return NextResponse.json({ url: imageUrl });
+    if (!publicUrl) {
+      throw new Error("Failed to generate public image URL");
+    }
+
+    return NextResponse.json({ url: publicUrl });
   } catch (error) {
     console.error("Upload error:", error);
     return NextResponse.json({ error: "Upload failed" }, { status: 500 });

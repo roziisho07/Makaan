@@ -5,19 +5,32 @@ import { sampleListings } from "../app/data/listings";
 const prisma = new PrismaClient();
 
 async function main() {
-  // Seed test admin user
-  const adminPassword = await hash("admin123", 10);
-  await prisma.appUser.upsert({
-    where: { email: "admin@makaan.local" },
-    update: {},
-    create: {
-      email: "admin@makaan.local",
-      passwordHash: adminPassword,
-      role: "admin",
-      id: "admin-user-seed",
-    },
-  });
-  console.log("✓ Seeded admin user: admin@makaan.local");
+  const adminSeedEmail = process.env.ADMIN_SEED_EMAIL;
+  const adminSeedPassword = process.env.ADMIN_SEED_PASSWORD;
+
+  if (adminSeedEmail && adminSeedPassword) {
+    const adminPasswordHash = await hash(adminSeedPassword, 10);
+
+    await prisma.appUser.upsert({
+      where: { email: adminSeedEmail },
+      update: {
+        passwordHash: adminPasswordHash,
+        role: "admin",
+      },
+      create: {
+        email: adminSeedEmail,
+        passwordHash: adminPasswordHash,
+        role: "admin",
+        id: "admin-user-seed",
+      },
+    });
+
+    console.log(`✓ Seeded admin user: ${adminSeedEmail}`);
+  } else {
+    console.log(
+      "- Skipping admin seed; set ADMIN_SEED_EMAIL and ADMIN_SEED_PASSWORD to enable it.",
+    );
+  }
 
   // Seed listings
   for (const listing of sampleListings) {

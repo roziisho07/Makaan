@@ -1,57 +1,67 @@
 # Makaan
 
-Modern real-estate web app built with Next.js App Router, with an AI-ready data model and personalization features.
+Makaan is a modern real-estate marketplace for browsing, saving, and managing residential property listings. It is designed to feel like a polished consumer listing platform while also giving owners and admins the tools to publish and maintain inventory from a dedicated dashboard.
 
-## Local development
+## What Makaan Does
 
-1. Install dependencies:
+Makaan helps people discover homes to buy or rent through a clean browsing experience, structured property details, and lightweight personalization. The product supports public listing discovery, authenticated user actions, and an internal management workflow for creating and editing listings.
 
-```bash
-npm install
-```
+## Core Experience
 
-2. Copy environment file and update your database URL:
+- Browse featured homes, rentals, and sale listings from a responsive catalog.
+- Open detailed property pages with image galleries, pricing, location, and highlights.
+- Filter inventory by listing type and availability.
+- Save interesting listings for later.
+- Send inquiries on properties directly from the app.
+- Receive recommendation-style suggestions based on user activity and saved items.
 
-```bash
-cp .env.example .env
-```
+## User Areas
 
-3. Start your PostgreSQL database, then initialize Prisma:
+### Public browsing
 
-```bash
-npm run db:generate
-npm run db:push
-npm run db:seed
-```
+Visitors can explore the home page, category pages, listing grids, and individual property pages without needing admin access. The experience is built to surface featured inventory quickly and make it easy to compare homes.
 
-4. Run the app:
+### Authentication
 
-```bash
-npm run dev
-```
+Makaan includes sign-in and sign-up flows so returning users can manage their activity and access protected sections of the product.
 
-Open http://localhost:3000.
+### Dashboard
 
-## Database commands
+Authenticated users can access a dashboard experience for listing management. This includes creating new listings, editing existing ones, and attaching property images.
 
-- `npm run db:generate`: Generate Prisma client.
-- `npm run db:migrate`: Create and apply a migration in development.
-- `npm run db:push`: Push schema changes without creating migration files.
-- `npm run db:seed`: Seed sample listings.
-- `npm run db:studio`: Open Prisma Studio.
+### Admin view
 
-## API endpoints
+Admins have access to an operational view of the platform, including listing management and platform-level oversight.
 
-- `GET /api/listings`: List/search listings.
-- `GET /api/listings?listingType=sale&status=available&limit=12`: Filter listings.
-- `GET /api/listings/[slug]`: Fetch one listing by slug.
+## Listing Details
 
-## AI-ready schema notes
+Each property can include:
 
-The `Listing` model includes fields for AI features:
+- Title and slug
+- Price and address
+- Beds, baths, and square footage
+- Description and neighborhood
+- Highlights and amenities
+- Listing type and status
+- Image gallery
 
-- `aiSummary`: generated natural-language summary.
-- `embeddingModel`: model metadata for vectors.
-- `embeddingVector`: JSON placeholder for embeddings until pgvector is added.
+This structure lets Makaan present properties in both compact catalog cards and full-page detail views.
 
-Additional models (`SearchEvent`, `SavedListing`, `Inquiry`) capture behavior and intent signals for future AI ranking and assistant workflows.
+## Personalization And Signals
+
+Makaan is set up to capture useful product signals such as:
+
+- Saved listings
+- Property inquiries
+- Search events
+- Click behavior tied to recommendation flows
+
+These signals support a more tailored browsing experience and give the product room to grow into stronger ranking and recommendation features over time.
+
+## AI Positioning
+
+Makaan includes an AI-ready assistant and data model, but the app still works well without live AI providers enabled. The core product experience remains focused on listing discovery, management, and conversion.
+
+## Product Goal
+
+The app sits between a consumer-facing property portal and a lightweight real-estate operations tool. It is meant to be practical for day-to-day listing workflows while still feeling polished enough for public users browsing homes.

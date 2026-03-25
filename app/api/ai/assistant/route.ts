@@ -18,6 +18,12 @@ const assistantSchema = z.object({
   listings: z.array(listingSchema).max(50),
 });
 
+interface AssistantOutput {
+  answer: string;
+  filtersApplied: string[];
+  suggestedIds: string[];
+}
+
 function parseBudget(input: string): number | null {
   const normalized = input.toLowerCase();
   const budgetMatch = normalized.match(
@@ -88,6 +94,79 @@ function parseLocation(input: string, listings: z.infer<typeof listingSchema>[])
   );
 }
 
+async function generateClaudeAnswer(input: {
+  message: string;
+  listings: z.infer<typeof listingSchema>[];
+  filtersApplied: string[];
+  suggestedTitles: string[];
+}) {
+  const apiKey = process.env.ANTHROPIC_API_KEY;
+  if (!apiKey) {
+    return null;
+  }
+
+  const model = process.env.ANTHROPIC_MODEL ?? "claude-3-5-sonnet-20241022";
+
+  const payload = {
+    model,
+    max_tokens: 300,
+    system:
+      "You are a concise real-estate assistant. Keep responses practical and under 80 words.",
+    messages: [
+      {
+        role: "user",
+        content: `User request: ${input.message}\n\nFilters detected: ${
+          input.filtersApplied.length > 0
+            ? input.filtersApplied.join(", ")
+            : "none"
+        }\nTop matching listings: ${
+          input.suggestedTitles.length > 0
+            ? input.suggestedTitles.join(" | ")
+            : "none"
+        }\n\nWrite a short recommendation for the user and next adjustment they can try.`,
+      },
+    ],
+  };
+
+  const response = await fetch("https://api.anthropic.com/v1/messages", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "x-api-key": apiKey,
+      "anthropic-version": "2023-06-01",
+    },
+    body: JSON.stringify(payload),
+  });
+
+  if (!response.ok) {
+    return null;
+  }
+
+  const parsed = (await response.json()) as {
+    content?: Array<{ type?: string; text?: string }>;
+  };
+
+  const text = parsed.content?.find((item) => item.type === "text")?.text;
+  return text?.trim() || null;
+}
+
+function buildFallbackAnswer(input: {
+  filteredCount: number;
+  filtersApplied: string[];
+}) {
+  if (input.filteredCount > 0) {
+    return `I found ${input.filteredCount} strong match${
+      input.filteredCount > 1 ? "es" : ""
+    }${
+      input.filtersApplied.length > 0
+        ? ` using ${input.filtersApplied.join(", ")}`
+        : ""
+    }. Start with these and adjust your budget or location if you want more options.`;
+  }
+
+  return "I could not find exact matches yet. Try increasing budget, removing strict location, or reducing bedroom requirements for better results.";
+}
+
 export async function POST(request: Request) {
   const body = await request.json().catch(() => null);
   const parsed = assistantSchema.safeParse(body);
@@ -124,16 +203,35 @@ export async function POST(request: Request) {
     location ? `Location: ${location}` : null,
   ].filter((item): item is string => Boolean(item));
 
-  const answer =
-    filtered.length > 0
-      ? `I found ${filtered.length} strong match${filtered.length > 1 ? "es" : ""}${filtersApplied.length > 0 ? ` using ${filtersApplied.join(", ")}` : ""}. Start with these and adjust your budget or location if you want more options.`
-      : "I could not find exact matches yet. Try increasing budget, removing strict location, or reducing bedroom requirements for better results.";
+  const suggestedIds = filtered.map((item) => item.id);
+
+  let answer = buildFallbackAnswer({
+    filteredCount: filtered.length,
+    filtersApplied,
+  });
+
+  try {
+    const claudeAnswer = await generateClaudeAnswer({
+      message,
+      listings,
+      filtersApplied,
+      suggestedTitles: filtered.map((item) => item.title),
+    });
+
+    if (claudeAnswer) {
+      answer = claudeAnswer;
+    }
+  } catch {
+    // Fall back to deterministic assistant answer if Claude call fails.
+  }
+
+  const responseData: AssistantOutput = {
+    answer,
+    filtersApplied,
+    suggestedIds,
+  };
 
   return NextResponse.json({
-    data: {
-      answer,
-      filtersApplied,
-      suggestedIds: filtered.map((item) => item.id),
-    },
+    data: responseData,
   });
 }
