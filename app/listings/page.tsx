@@ -2,6 +2,8 @@ import ListingCatalog from "../components/ListingCatalog";
 import PageIntro from "../components/PageIntro";
 import { getListings } from "../lib/listingsRepository";
 
+export const dynamic = "force-dynamic";
+
 async function ListingsPage() {
   const listings = await getListings();
 

@@ -3,6 +3,8 @@ import Hero from "./components/Hero";
 import MainListing from "./components/MianListing";
 import { getListings } from "./lib/listingsRepository";
 
+export const dynamic = "force-dynamic";
+
 async function Home() {
   const listings = await getListings();
 
